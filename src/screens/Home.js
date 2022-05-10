@@ -8,6 +8,7 @@ import {
   FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class Home extends Component {
   constructor(props) {
@@ -90,6 +91,11 @@ class Home extends Component {
       ],
     };
   }
+
+  componentDidMount() { 
+    // AsyncStorage.clear()
+   }
+
   render() {
     return (
       <View style={{flex: 1, backgroundColor: '#f1f1f1'}}>
@@ -104,7 +110,8 @@ class Home extends Component {
               Home
             </Text>
           </View>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => this.props.navigation.navigate('Cart')}>
             <Icon name="shopping-cart" size={22} color="#000" />
           </TouchableOpacity>
         </View>
@@ -186,7 +193,7 @@ class Home extends Component {
                       productTitle: item.productTitle,
                       productDescription: item.productDescription,
                       sizeList: item.sizeList,
-                      price: item.price
+                      price: item.price,
                     })
                   }>
                   <Image

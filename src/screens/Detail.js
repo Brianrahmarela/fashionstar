@@ -7,19 +7,103 @@ import {
   StatusBar,
   Image,
   FlatList,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 class Detail extends Component {
   constructor(props) {
     super(props);
     this.state = {
       itemYangDiseleksi: {},
+      cart: [],
     };
   }
+
+  componentDidMount() {
+    this.getData();
+  }
+
+  getData = async () => {
+    try {
+      let value = await AsyncStorage.getItem('cart');
+      value = JSON.parse(value);
+
+      if (value !== null) {
+        this.setState({cart: value});
+      }
+
+      console.log('data cart berhasil di get', value);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  saveData = async cart => {
+    try {
+      await AsyncStorage.setItem('cart', JSON.stringify(cart));
+      console.log('data user detail disimpan');
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  tambahItem = (namaProduk, size, harga, sisaStock) => {
+    if (size === undefined) {
+      Alert.alert('Warning', 'Silahkan pilih Size');
+    } else {
+      let cart = this.state.cart;
+
+      if (cart.length === 0) {
+        console.log('card length == 0', cart.length === 0);
+        cart.push({
+          namaProduk: namaProduk,
+          size: size,
+          harga: harga,
+          sisaStock: sisaStock,
+          qty: 1,
+        });
+      } else {
+        for (let i = 0; i < cart.length; i++) {
+          console.log('i else', i);
+          if (
+            namaProduk == cart[i].namaProduk &&
+            size == cart[i].size
+          ) {
+            console.log('cart[i]', cart[i]);
+            console.log('namaProduk', namaProduk);
+            console.log('cart[i].namaProduk', cart[i].namaProduk);
+            cart[i].qty++;
+            console.log('Ketemu yg sama');
+            break;
+          }
+
+          if (i == cart.length - 1) {
+            console.log('tidak Ketemu');
+            console.log('i == cart.length-1', i == cart.length - 1);
+            console.log('i', i);
+            console.log('cart.length', cart.length);
+            console.log('cart.length-1', cart.length - 1);
+            cart.push({
+              namaProduk: namaProduk,
+              size: size,
+              harga: harga,
+              sisaStock: sisaStock,
+              qty: 1,
+            });
+            break;
+          }
+        }
+      }
+      console.log('card anda', cart);
+
+      this.setState({cart});
+      this.saveData(cart);
+    }
+  };
+
   render() {
-    console.log('props detail', this.props);
-    // console.log('state detail', this.state);
+    // console.log('props detail', this.props);
+    console.log('state detail cart', this.state);
     return (
       <View style={{flex: 1}}>
         <StatusBar backgroundColor="#f1f1f1" barStyle="dark-content" />
@@ -148,7 +232,15 @@ class Detail extends Component {
             marginBottom: 10,
             borderRadius: 10,
             elevation: 2,
-          }}>
+          }}
+          onPress={() =>
+            this.tambahItem(
+              this.props.route.params.productTitle,
+              this.state.itemYangDiseleksi.size,
+              this.props.route.params.price.toString(),
+              this.state.itemYangDiseleksi.stock,
+            )
+          }>
           <Text style={{color: '#fff'}}>Add to Cart</Text>
         </TouchableOpacity>
       </View>
